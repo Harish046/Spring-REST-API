@@ -1,0 +1,71 @@
+#################################################
+CREATE EMPLOYER TABLE
+#################################################
+CREATE TABLE Employer
+(ERID serial primary key,
+COMPANYNAME	 VARCHAR(20),
+ADDRESS1	 VARCHAR(20),
+ADDRESS2	 VARCHAR(20),
+CITY	 VARCHAR(15),
+STAT	 VARCHAR(20),
+POSTCODE	 VARCHAR(10),
+EMAIL	 VARCHAR(30),
+MOBILE	 VARCHAR(10),
+PWD	 VARCHAR(20));
+
+
+
+#################################################
+CREATE EMPLOYER ERID SEQUENCE
+#################################################
+CREATE SEQUENCE employer_erid_seq
+    INCREMENT 1
+    START 101010
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+
+
+
+#################################################
+INSERT NEW EMPLOYER RECORD
+#################################################
+CREATE OR REPLACE FUNCTION ADD_EMPLOYER ( 
+IN 		STR_COMPANYNAME	 VARCHAR(20), 
+IN 		STR_ADDRESS1	 VARCHAR(20),
+IN 		STR_ADDRESS2	 VARCHAR(20),
+IN 		STR_CITY	 VARCHAR(15),
+IN 		STR_STAT	 VARCHAR(20),
+IN 		STR_POSTCODE	 VARCHAR(10),
+IN 		STR_EMAIL	 VARCHAR(30),
+IN 		STR_MOBILE	 VARCHAR(10),
+IN 		STR_PWD	 VARCHAR(20))
+RETURNS integer AS
+$BODY$
+DECLARE IERID INTEGER;
+BEGIN
+	IERID:=NEXTVAL('EMPLOYER_ERID_SEQ');
+	INSERT INTO EMPLOYER 
+    (ERID,COMPANYNAME,ADDRESS1,ADDRESS2,CITY,STAT,POSTCODE,EMAIL,MOBILE,PWD) 
+    VALUES(IERID,STR_COMPANYNAME,STR_ADDRESS1,STR_ADDRESS2,STR_CITY,STR_STAT,STR_POSTCODE,STR_EMAIL,STR_MOBILE,STR_PWD);
+    RETURN IERID;
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE
+COST 100;
+
+
+
+#################################################
+CHECK IF EMPLOYER ALREADY REGISTERED WITH EMAIL
+#################################################
+CREATE OR REPLACE FUNCTION CHECKEMAIL( 
+ INOUT 		str_email	VARCHAR(10), 
+ OUT 		str_erid	INTEGER)
+AS $$
+BEGIN 
+	SELECT ERID,EMAIL
+ 	INTO str_erid, str_email
+	FROM EMPLOYER where EMAIL = str_email;
+END;
+$$ LANGUAGE plpgsql;
